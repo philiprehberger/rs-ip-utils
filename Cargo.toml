@@ -1,0 +1,10 @@
+[package]
+name = "philiprehberger-ip-utils"
+version = "0.1.0"
+edition = "2021"
+authors = ["Philip Rehberger"]
+description = "IP address utilities — CIDR matching, subnet calculation, classification, and anonymization"
+license = "MIT"
+repository = "https://github.com/philiprehberger/rs-ip-utils"
+keywords = ["ip", "cidr", "network", "subnet", "ipv6"]
+categories = ["network-programming"]
