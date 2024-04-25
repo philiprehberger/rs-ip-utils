@@ -1,12 +1,16 @@
 # rs-ip-utils
 
-IP address utilities — CIDR matching, subnet calculation, classification, and anonymization.
+[![CI](https://github.com/philiprehberger/rs-ip-utils/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rs-ip-utils/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/philiprehberger-ip-utils.svg)](https://crates.io/crates/philiprehberger-ip-utils)
+[![License](https://img.shields.io/github/license/philiprehberger/rs-ip-utils)](LICENSE)
+
+IP address utilities — CIDR matching, subnet calculation, classification, and anonymization
 
 ## Installation
 
 ```toml
 [dependencies]
-philiprehberger-ip-utils = "0.1"
+philiprehberger-ip-utils = "0.1.0"
 ```
 
 ## Usage
@@ -63,6 +67,13 @@ assert_eq!(anon.to_string(), "192.168.1.0");
 | `IpClassify` trait | IP classification methods |
 | `anonymize(ip, bits)` | Zero last N bits |
 | `aggregate(cidrs)` | Merge overlapping CIDRs |
+
+## Development
+
+```bash
+cargo test
+cargo clippy -- -D warnings
+```
 
 ## License
 
