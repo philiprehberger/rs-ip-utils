@@ -2,7 +2,7 @@
 //!
 //! This crate provides tools for working with IPv4 and IPv6 addresses using only the
 //! standard library. Features include CIDR range parsing and matching, subnet calculations,
-//! IP classification (private, loopback, CGNAT, etc.), anonymization for GDPR compliance,
+//! IP classification (private, loopback, CGNAT, bogon detection, etc.), anonymization for GDPR compliance,
 //! and CIDR aggregation.
 //!
 //! # Examples
@@ -338,6 +338,12 @@ pub trait IpClassify {
     /// documentation, or reserved.
     fn is_global_ip(&self) -> bool;
 
+    /// Returns `true` if this is a bogon/martian address (not globally routable).
+    ///
+    /// A bogon address is any address that should not appear on the public internet:
+    /// private, loopback, link-local, CGNAT, documentation, or reserved.
+    fn is_bogon(&self) -> bool;
+
     /// Returns the classification of this IP address.
     fn classify(&self) -> IpClass;
 }
@@ -431,6 +437,15 @@ impl IpClassify for IpAddr {
             && !self.is_cgnat()
             && !IpClassify::is_documentation(self)
             && !self.is_reserved()
+    }
+
+    fn is_bogon(&self) -> bool {
+        self.is_private()
+            || self.is_loopback_ip()
+            || self.is_link_local()
+            || self.is_cgnat()
+            || IpClassify::is_documentation(self)
+            || self.is_reserved()
     }
 
     fn classify(&self) -> IpClass {
@@ -1106,5 +1121,109 @@ mod tests {
     fn test_aggregate_empty() {
         let merged = aggregate(&[]);
         assert!(merged.is_empty());
+    }
+
+    #[test]
+    fn test_is_bogon_private() {
+        let ip: IpAddr = "10.0.0.1".parse().unwrap();
+        assert!(ip.is_bogon());
+
+        let ip: IpAddr = "192.168.1.1".parse().unwrap();
+        assert!(ip.is_bogon());
+
+        let ip: IpAddr = "172.16.5.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_loopback() {
+        let ip: IpAddr = "127.0.0.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_link_local() {
+        let ip: IpAddr = "169.254.1.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_cgnat() {
+        let ip: IpAddr = "100.64.0.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_documentation() {
+        let ip: IpAddr = "192.0.2.1".parse().unwrap();
+        assert!(ip.is_bogon());
+
+        let ip: IpAddr = "198.51.100.1".parse().unwrap();
+        assert!(ip.is_bogon());
+
+        let ip: IpAddr = "203.0.113.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_reserved() {
+        let ip: IpAddr = "240.0.0.1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_global_returns_false() {
+        let ip: IpAddr = "8.8.8.8".parse().unwrap();
+        assert!(!ip.is_bogon());
+
+        let ip: IpAddr = "1.1.1.1".parse().unwrap();
+        assert!(!ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_ipv6_private() {
+        let ip: IpAddr = "fc00::1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_ipv6_loopback() {
+        let ip: IpAddr = "::1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_ipv6_link_local() {
+        let ip: IpAddr = "fe80::1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_ipv6_documentation() {
+        let ip: IpAddr = "2001:db8::1".parse().unwrap();
+        assert!(ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_ipv6_global_returns_false() {
+        let ip: IpAddr = "2001:4860:4860::8888".parse().unwrap();
+        assert!(!ip.is_bogon());
+    }
+
+    #[test]
+    fn test_is_bogon_inverse_of_is_global() {
+        let addrs = vec![
+            "8.8.8.8", "1.1.1.1", "10.0.0.1", "127.0.0.1",
+            "169.254.1.1", "100.64.0.1", "192.0.2.1", "240.0.0.1",
+            "2001:4860:4860::8888", "fc00::1", "::1", "fe80::1",
+        ];
+        for addr_str in addrs {
+            let ip: IpAddr = addr_str.parse().unwrap();
+            assert_eq!(
+                ip.is_bogon(),
+                !ip.is_global_ip(),
+                "is_bogon and !is_global_ip should match for {addr_str}"
+            );
+        }
     }
 }

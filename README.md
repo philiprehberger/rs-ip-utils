@@ -10,7 +10,7 @@ IP address utilities — CIDR matching, subnet calculation, classification, and 
 
 ```toml
 [dependencies]
-philiprehberger-ip-utils = "0.1.1"
+philiprehberger-ip-utils = "0.2.0"
 ```
 
 ## Usage
@@ -65,6 +65,7 @@ assert_eq!(anon.to_string(), "192.168.1.0");
 | `.subnet_mask()` | Subnet mask (IPv4) |
 | `.overlaps(other)` | Check if CIDRs overlap |
 | `IpClassify` trait | IP classification methods |
+| `.is_bogon()` | Check if address is a bogon/martian (non-globally-routable) |
 | `anonymize(ip, bits)` | Zero last N bits |
 | `aggregate(cidrs)` | Merge overlapping CIDRs |
 

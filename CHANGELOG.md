@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.0] - 2026-04-05
+
+- Add `is_bogon()` method to `IpClassify` trait for bogon/martian address detection
+- Returns true for private, loopback, link-local, CGNAT, documentation, and reserved addresses
+
 ## 0.1.2 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section
