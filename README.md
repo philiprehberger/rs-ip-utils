@@ -3,6 +3,7 @@
 [![CI](https://github.com/philiprehberger/rs-ip-utils/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rs-ip-utils/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/philiprehberger-ip-utils.svg)](https://crates.io/crates/philiprehberger-ip-utils)
 [![License](https://img.shields.io/github/license/philiprehberger/rs-ip-utils)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 IP address utilities — CIDR matching, subnet calculation, classification, and anonymization
 
